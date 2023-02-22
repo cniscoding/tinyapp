@@ -56,4 +56,13 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-// generateRandomString()
+const generateRandomString = function(uniqueLength){
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomString = '';
+  for (let i = 0; i < uniqueLength; i++){
+    const randomIndex = (Math.floor(Math.random()*(letters.length-1)));
+    randomString += letters[randomIndex]
+  }
+}
+
+// generateRandomString(6)
