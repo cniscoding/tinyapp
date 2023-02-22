@@ -31,6 +31,13 @@ app.post("/urls", (req, res) => {
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
+// add post to delete
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls')
+});
+
 // redirects to the long URL based on the short string.
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
