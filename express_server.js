@@ -21,6 +21,16 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
+// add POST route for /login
+
+app.post("/login", (req, res) => {
+  const cookies = req.body.username;
+  // console.log('cookies, req.body.username;', req.body.username)
+  //set cookies??
+  res.cookie('username', cookies)
+  res.redirect('/urls')
+});
+
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
   const id = generateRandomString(6); // creates a unique ID
@@ -61,7 +71,7 @@ app.get("/u/:id", (req, res) => {
   }
   //What would happen if a client requests a short URL with a non-existant id?
   // else { need fix this edge case
-  //   res.redirect(error); // send to error page
+  //   res.status(400).send('please enter a url'); // send to error page
   // }
 
   // console.log('longURL', longURL)
@@ -70,6 +80,11 @@ app.get("/u/:id", (req, res) => {
   // console.log('req.params', req.param) //req.params [Function: param]
   
 });
+
+// // login page - do i even need this?
+// app.get("/login", (req,res) => {
+//   res.render('login')
+// })
 
 // home page that shows the list
 app.get("/urls", (req,res) => {
