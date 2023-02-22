@@ -35,15 +35,22 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 // add post to EDIT
 app.post("/urls/:id/", (req, res) => {
   const id = req.params.id;
+  console.log('req.params.id;',req.params.id)
   const updateURL = req.body.longURL;
   urlDatabase[id] = updateURL;
-  res.redirect(`/urls/${id}`)
+  res.redirect(`/urls`);
+});
+
+//not going to the edit page.
+app.post("/urls", (req, res) => {
+  const id = req.params.id;
+  res.redirect(`/urls/${id}`);
 });
 
 // redirects to the long URL based on the short string.
