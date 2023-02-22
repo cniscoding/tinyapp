@@ -31,11 +31,19 @@ app.post("/urls", (req, res) => {
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
-// add post to delete
+// add post to DELETE
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls')
+});
+
+// add post to EDIT
+app.post("/urls/:id/", (req, res) => {
+  const id = req.params.id;
+  const updateURL = req.body.longURL;
+  urlDatabase[id] = updateURL;
+  res.redirect(`/urls/${id}`)
 });
 
 // redirects to the long URL based on the short string.
@@ -77,4 +85,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-/// DELETE
