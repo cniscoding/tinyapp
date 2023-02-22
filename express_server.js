@@ -36,7 +36,9 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString(6); // creates a unique ID
   urlDatabase[id] = req.body.longURL; // stores the newly created ID and long URL
   res.redirect(`/urls/${id}`);
-  // console.log(req.body); // Log the POST request body to the console gives { longURL : 'address.com'}
+  // console.log('req.body', req.body); // Log the POST request body to the console gives { longURL : 'address.com'}
+  // console.log('req.params', req.params);
+  // console.log('req', req)
   // console.log(urlDatabase[id]) // gives 'address.com'
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
@@ -51,7 +53,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // add post to EDIT
 app.post("/urls/:id/", (req, res) => {
   const id = req.params.id;
-  console.log('req.params.id;',req.params.id)
+  // console.log('req.params.id;',req.params.id)
   const updateURL = req.body.longURL;
   urlDatabase[id] = updateURL;
   res.redirect(`/urls`);
@@ -73,12 +75,6 @@ app.get("/u/:id", (req, res) => {
   // else { need fix this edge case
   //   res.status(400).send('please enter a url'); // send to error page
   // }
-
-  // console.log('longURL', longURL)
-  // console.log('urlDatabase', urlDatabase); // returns the urlDatabase object
-  // console.log(urlDatabase[req.params.id]) // www.yahoo.ca
-  // console.log('req.params', req.param) //req.params [Function: param]
-  
 });
 
 // // login page - do i even need this?
