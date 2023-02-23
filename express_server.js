@@ -25,14 +25,18 @@ const generateRandomString = function(uniqueLength) {
 };
 
 // add POST route for /login
-
 app.post("/login", (req, res) => {
-  const cookies = req.body.username;
-
-  //set cookies??
-  res.cookie('username', cookies);
+  const username = req.body.username;
+  res.cookie('username', username);
   res.redirect('/urls');
 });
+
+// logout
+app.post("/logout", (req,res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
+
 
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
@@ -96,7 +100,10 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, urls: urlDatabase };
+  const templateVars = { 
+    id: req.params.id, 
+    urls: urlDatabase 
+  };
   res.render("urls_show", templateVars);
 });
 
