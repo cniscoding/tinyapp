@@ -46,7 +46,7 @@ const userLookUp = function(inputEmail) {
   for (let user of Object.keys(users)) {
     if (inputEmail === users[user].email) {
       return true;
-    }    
+    }
   }
   return false;
 };
@@ -54,38 +54,40 @@ const userLookUp = function(inputEmail) {
 const userPassLookUp = function(inputPass) {
   for (let user of Object.keys(users)) {
     if (inputPass === users[user].password) {
-      // how do i pass this to app post to set cookie?
-      // const userID = users[user].id
       return true;
-    }    
+    }
   }
   return false;
 };
 
+const userIdLookUp = function(inputEmail) {
+  for (let user of Object.keys(users)) {
+    if (inputEmail === users[user].email) {
+      return users[user].id;
+    }
+  }
+};
 
-// POST login page?
-// won't work beacuse the conditional is not completed
+// POST login
 app.post("/login", (req,res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
-  // how do i pull the ID now?
-  // const loginID = users[user].inputEmail
 
-  if (!userLookUp(inputEmail)){
+  if (!userLookUp(inputEmail)) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
   
-  if (!userPassLookUp(inputPassword)){
+  if (!userPassLookUp(inputPassword)) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
-  console.log(userID)
-  // console.log(userID)
-  // res.cookie('user_Id', newUser);
-  // res.redirect('/urls/');
+
+  const user = userIdLookUp(inputEmail);
+  // console.log('user',user)
+  res.cookie('user_Id', user);
+  res.redirect('/urls/');
 });
 
 // GET login page
-//does not have the the email and password match yet
 app.get("/login", (req, res)=> {
   console.log('two login get');
   const templateVars = {
@@ -141,7 +143,7 @@ app.post("/login", (req, res) => {
 // logout
 app.post("/logout", (req,res) => {
   res.clearCookie('user_Id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 
