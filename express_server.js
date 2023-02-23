@@ -14,6 +14,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 const generateRandomString = function(uniqueLength) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -23,6 +36,36 @@ const generateRandomString = function(uniqueLength) {
   }
   return randomString;
 };
+
+// register new user
+app.post('/register', (req,res) =>{
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = generateRandomString(6);
+
+  const newUser = {
+    id,
+    email,
+    password
+  };
+  users[id] = newUser;
+  
+  console.log('email', email)
+  console.log('password', password)
+  console.log('id', id)
+  console.log('newUser', newUser)
+
+  res.cookie('user_id', newUser);
+  res.redirect('/urls');
+})
+
+// add GET /register
+app.get("/register", (req, res)=> {
+  const templateVars = {
+    username : req.cookies['username'],
+  };
+  res.render('register', templateVars)
+})
 
 // add POST route for /login
 app.post("/login", (req, res) => {
@@ -95,14 +138,18 @@ app.get("/urls", (req,res) => {
 
 // create a new URL page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username : req.cookies['username'],
+  };
+  res.render("urls_new", templateVars);
 });
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
-    urls: urlDatabase 
+    urls: urlDatabase,
+    username : req.cookies['username'],
   };
   res.render("urls_show", templateVars);
 });
