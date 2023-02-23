@@ -150,8 +150,22 @@ app.post("/urls", (req, res) => {
     return res.status(401).send('401 - Unauthorized access. Please login.');
   };
   const id = generateRandomString(6); // creates a unique ID
-  urlDatabase[id] = req.body.longURL; // stores the newly created ID and long URL
-  res.redirect(`/urls/${id}`);
+  const newUserId = req.cookies.user_Id
+  const inputUrl = req.body.longURL;
+  // MADE LONG URL EDIT HERE  
+  // console.log('urlDatabase[id]', urlDatabase[id])
+  // console.log('req.body.longURL',req.body.longURL)
+  // console.log('urlDatabase', urlDatabase)
+
+  const addLink = {
+    longURL : inputUrl,
+    userID : newUserId,
+  };
+
+  // console.log('urlDatabase[id][user_Id]',urlDatabase[id])
+  urlDatabase[id] = addLink; // stores the newly created ID and long URL
+  // console.log('urlDatabase', urlDatabase) // works as intended
+   res.redirect(`/urls/${id}`);
 });
 
 // add post to DELETE
@@ -169,10 +183,16 @@ app.post("/urls/:id/", (req, res) => {
   if (!req.cookies.user_Id){
     return res.status(401).send('401 - Unauthorized access. Please login.');
   };
+  
   const id = req.params.id;
+
+  
+  // MADE LONG URL EDIT HERE
+  console.log('req.params.id',req.params.id)
   const updateURL = req.body.longURL;
-  urlDatabase[id] = updateURL;
+  urlDatabase[id].longURL = updateURL;
   res.redirect(`/urls`);
+  console.log(urlDatabase)
 });
 
 //edit page
@@ -185,12 +205,10 @@ app.post("/urls", (req, res) => {
 });
 
 // redirects to the long URL based on the short string.
-// NEED FIX THIS EDGE CASE DOES NOT WORK
-// where does this get go to?
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  if (longURL) {
-    res.redirect(longURL);
+  const linkLongUrl = urlDatabase[req.params.id].longURL;
+  if (linkLongUrl) {
+    res.redirect(linkLongUrl);
   }
 });
 
