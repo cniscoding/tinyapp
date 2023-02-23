@@ -25,6 +25,11 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  test1: {
+    id: "tester1",
+    email: "tester1@test.ca",
+    password: "testme",
+  },
 };
 // helper functions
 const generateRandomString = function(uniqueLength) {
@@ -37,25 +42,46 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
-
-const userLookUp = function(email) {
+const userLookUp = function(inputEmail) {
   for (let user of Object.keys(users)) {
-    if (email !== users[user].email) {
-      return null;
-    }
-    return users;
+    if (inputEmail === users[user].email) {
+      return true;
+    }    
   }
+  return false;
 };
+
+const userPassLookUp = function(inputPass) {
+  for (let user of Object.keys(users)) {
+    if (inputPass === users[user].password) {
+      // how do i pass this to app post to set cookie?
+      // const userID = users[user].id
+      return true;
+    }    
+  }
+  return false;
+};
+
+
 // POST login page?
 // won't work beacuse the conditional is not completed
 app.post("/login", (req,res) => {
-  console.log('one login post');
-  const email = req.body.email;
-  const password = req.body.password;
-  // if statement for wrong password and/or account does not exist
+  const inputEmail = req.body.email;
+  const inputPassword = req.body.password;
+  // how do i pull the ID now?
+  // const loginID = users[user].inputEmail
 
-  // res.cookie('user_id', user_Id);
-  res.redirect('/urls/');
+  if (!userLookUp(inputEmail)){
+    return res.status(403).send('error 403 - please enter a valid email and/or password');
+  }
+  
+  if (!userPassLookUp(inputPassword)){
+    return res.status(403).send('error 403 - please enter a valid email and/or password');
+  }
+  console.log(userID)
+  // console.log(userID)
+  // res.cookie('user_Id', newUser);
+  // res.redirect('/urls/');
 });
 
 // GET login page
