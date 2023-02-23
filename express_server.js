@@ -1,10 +1,13 @@
+const cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
+//middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -25,10 +28,10 @@ const generateRandomString = function(uniqueLength) {
 
 app.post("/login", (req, res) => {
   const cookies = req.body.username;
-  // console.log('cookies, req.body.username;', req.body.username)
+
   //set cookies??
-  res.cookie('username', cookies)
-  res.redirect('/urls')
+  res.cookie('username', cookies);
+  res.redirect('/urls');
 });
 
 // takes submitted input and adds to urlDatabase
@@ -36,11 +39,6 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString(6); // creates a unique ID
   urlDatabase[id] = req.body.longURL; // stores the newly created ID and long URL
   res.redirect(`/urls/${id}`);
-  // console.log('req.body', req.body); // Log the POST request body to the console gives { longURL : 'address.com'}
-  // console.log('req.params', req.params);
-  // console.log('req', req)
-  // console.log(urlDatabase[id]) // gives 'address.com'
-  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 // add post to DELETE
@@ -59,7 +57,7 @@ app.post("/urls/:id/", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//not going to the edit page.
+//edit page
 app.post("/urls", (req, res) => {
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
@@ -84,7 +82,10 @@ app.get("/u/:id", (req, res) => {
 
 // home page that shows the list
 app.get("/urls", (req,res) => {
-  const templateVars = { urls : urlDatabase };
+  const templateVars = {
+    urls : urlDatabase,
+    username : req.cookies['username'],
+  };
   res.render('urls_index', templateVars);
 });
 
