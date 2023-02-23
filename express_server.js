@@ -42,30 +42,17 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
-const userLookUp = function(inputEmail) {
+const userLookUp = function(input, search) {
   for (let user of Object.keys(users)) {
-    if (inputEmail === users[user].email) {
+    if (input === users[user][search]) {
       return true;
+    }
+    if (search === 'id') {
+      if (input === users[user].email)
+        return users[user].id;
     }
   }
   return false;
-};
-
-const userPassLookUp = function(inputPass) {
-  for (let user of Object.keys(users)) {
-    if (inputPass === users[user].password) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const userIdLookUp = function(inputEmail) {
-  for (let user of Object.keys(users)) {
-    if (inputEmail === users[user].email) {
-      return users[user].id;
-    }
-  }
 };
 
 // POST login
@@ -73,23 +60,24 @@ app.post("/login", (req,res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
 
-  if (!userLookUp(inputEmail)) {
+  if (!userLookUp(inputEmail, 'email')) {
+
+    console.log('1');
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
   
-  if (!userPassLookUp(inputPassword)) {
+  if (!userLookUp(inputPassword, 'password')) {
+    console.log('2');
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
 
-  const user = userIdLookUp(inputEmail);
-  // console.log('user',user)
+  const user = userLookUp(inputEmail, 'id');
   res.cookie('user_Id', user);
   res.redirect('/urls/');
 });
 
 // GET login page
 app.get("/login", (req, res)=> {
-  console.log('two login get');
   const templateVars = {
     user_Id : req.cookies.user_Id,
   };
@@ -106,27 +94,18 @@ app.post('/register', (req,res) =>{
     return res.status(400).send('error 400 - please enter an email and/or password');
   }
   
-  if (userLookUp(inputEmail)){
-    return res.status(400).send('error 400 - email already exist')
+  if (userLookUp(inputEmail, 'email')) {
+    return res.status(400).send('error 400 - email already exist');
   }
-  // for (let user of Object.keys(users)) {
-  //   if (req.body.email === users[user].email) {
-  //     return res.status(400).send('error 400 - email already exist');
-  //   }
-  // }
-  
-  // const email = req.body.email;
-  // const password = req.body.password;
+
   const newUser = {
-    id,
-    inputEmail,
-    inputPassword
+    id : inputEmail,
+    email : inputEmail,
+    password : inputPassword
   };
   users[id] = newUser;
-  console.log('users', users);
-  res.cookie('user_Id', newUser);
+  res.cookie('user_Id', newUser.email);
   res.redirect('/urls');
-  // res.redirect('register');
 });
 
 // add GET /register
@@ -181,6 +160,7 @@ app.post("/urls", (req, res) => {
 });
 
 // redirects to the long URL based on the short string.
+// NEED FIX THIS EDGE CASE DOES NOT WORK
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   if (longURL) {
