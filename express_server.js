@@ -98,30 +98,35 @@ app.get("/login", (req, res)=> {
 
 // register new user
 app.post('/register', (req,res) =>{
-  console.log('three register post');
-  if (req.body.email === '' || req.body.password === '') {
+  const id = generateRandomString(6);
+  const inputEmail = req.body.email;
+  const inputPassword = req.body.password;
+  
+  if (inputEmail === '' || inputPassword === '') {
     return res.status(400).send('error 400 - please enter an email and/or password');
   }
   
-  for (let user of Object.keys(users)) {
-    if (req.body.email === users[user].email) {
-      return res.status(400).send('error 400 - email already exist');
-    }
+  if (userLookUp(inputEmail)){
+    return res.status(400).send('error 400 - email already exist')
   }
+  // for (let user of Object.keys(users)) {
+  //   if (req.body.email === users[user].email) {
+  //     return res.status(400).send('error 400 - email already exist');
+  //   }
+  // }
   
-  const email = req.body.email;
-  const password = req.body.password;
-  const id = generateRandomString(6);
+  // const email = req.body.email;
+  // const password = req.body.password;
   const newUser = {
     id,
-    email,
-    password
+    inputEmail,
+    inputPassword
   };
   users[id] = newUser;
   console.log('users', users);
   res.cookie('user_Id', newUser);
   res.redirect('/urls');
-  res.redirect('register');
+  // res.redirect('register');
 });
 
 // add GET /register
