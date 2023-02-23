@@ -9,11 +9,22 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+// update urlDatabase to the below
+// const urlDatabase = {
+//   b2xVn2: "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+};
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -113,8 +124,6 @@ app.get("/register", (req, res)=> {
   if (req.cookies.user_Id){
     return res.redirect('/urls');
   };
-  
-  console.log('four /register GET');
   const templateVars = {
     user_Id : req.cookies.user_Id,
   };
@@ -177,15 +186,12 @@ app.post("/urls", (req, res) => {
 
 // redirects to the long URL based on the short string.
 // NEED FIX THIS EDGE CASE DOES NOT WORK
+// where does this get go to?
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   if (longURL) {
     res.redirect(longURL);
   }
-  //What would happen if a client requests a short URL with a non-existant id?
-  // else { need fix this edge case
-  //   res.status(400).send('please enter a url'); // send to error page
-  // }
 });
 
 
@@ -211,9 +217,12 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
-  if (!req.cookies.user_Id){
-    return res.status(401).send('401 - Unauthorized access. Please login.');
-  };
+  // if (!req.cookies.user_Id){
+  //   return res.status(401).send('401 - Unauthorized access. Please login.');
+  // };
+  if (!urlDatabase[req.params.id]){
+    return res.status(404).send('404 - Page not found.')
+  }
   const templateVars = {
     id: req.params.id,
     urls: urlDatabase,
