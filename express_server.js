@@ -38,72 +38,72 @@ const generateRandomString = function(uniqueLength) {
 };
 
 
-const userLookUp = function(email){
-  for (let user of Object.keys(users)){
-    if (email !== users[user].email){
+const userLookUp = function(email) {
+  for (let user of Object.keys(users)) {
+    if (email !== users[user].email) {
       return null;
-    } 
+    }
     return users;
   }
-}
+};
 // POST login page?
 // won't work beacuse the conditional is not completed
 app.post("/login", (req,res) => {
-  console.log('one login post')
+  console.log('one login post');
   const email = req.body.email;
   const password = req.body.password;
   // if statement for wrong password and/or account does not exist
 
   // res.cookie('user_id', user_Id);
-  res.redirect('/urls/')
-})
+  res.redirect('/urls/');
+});
 
-// GET login page 
+// GET login page
 //does not have the the email and password match yet
 app.get("/login", (req, res)=> {
-  console.log('two login get')
+  console.log('two login get');
   const templateVars = {
     user_Id : req.cookies.user_Id,
   };
-  res.render('login', templateVars)
-})
+  res.render('login', templateVars);
+});
 
 // register new user
 app.post('/register', (req,res) =>{
-  console.log('three register post')
-  // if (req.body.email === '' || req.body.password === ''){
-  //   return res.status(400).send('error 400 - please enter an email and/or password')
-  // }
+  console.log('three register post');
+  if (req.body.email === '' || req.body.password === '') {
+    return res.status(400).send('error 400 - please enter an email and/or password');
+  }
   
-  // for (let user of Object.keys(users)){
-  //   if (req.body.email === users[user].email){
-  //     return res.status(400).send('error 400 - email already exist')
-  //   }
-  // }
+  for (let user of Object.keys(users)) {
+    if (req.body.email === users[user].email) {
+      return res.status(400).send('error 400 - email already exist');
+    }
+  }
   
-  // const email = req.body.email;
-  // const password = req.body.password;
-  // const id = generateRandomString(6);
-  // const newUser = {
-  //   id,
-  //   email,
-  //   password
-  // };
-  // users[id] = newUser;
-  // console.log('users', users)
-  // res.cookie('user_Id', newUser);
-  // res.redirect('/urls');
-  res.redirect('register')
-})
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = generateRandomString(6);
+  const newUser = {
+    id,
+    email,
+    password
+  };
+  users[id] = newUser;
+  console.log('users', users);
+  res.cookie('user_Id', newUser);
+  res.redirect('/urls');
+  res.redirect('register');
+});
 
 // add GET /register
 app.get("/register", (req, res)=> {
-  console.log('four /register GET')
+  console.log('four /register GET');
   const templateVars = {
     user_Id : req.cookies.user_Id,
   };
-  res.render('register', templateVars)
-})
+  res.render('register', templateVars);
+});
 
 // add POST route for /login
 app.post("/login", (req, res) => {
@@ -179,8 +179,8 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { 
-    id: req.params.id, 
+  const templateVars = {
+    id: req.params.id,
     urls: urlDatabase,
     user_Id : req.cookies.user_Id,
   };
