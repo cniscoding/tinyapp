@@ -61,13 +61,10 @@ app.post("/login", (req,res) => {
   const inputPassword = req.body.password;
 
   if (!userLookUp(inputEmail, 'email')) {
-
-    console.log('1');
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
   
   if (!userLookUp(inputPassword, 'password')) {
-    console.log('2');
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
 
@@ -78,6 +75,9 @@ app.post("/login", (req,res) => {
 
 // GET login page
 app.get("/login", (req, res)=> {
+  if (req.cookies.user_Id){
+    return res.redirect('/urls');
+  };
   const templateVars = {
     user_Id : req.cookies.user_Id,
   };
@@ -110,6 +110,10 @@ app.post('/register', (req,res) =>{
 
 // add GET /register
 app.get("/register", (req, res)=> {
+  if (req.cookies.user_Id){
+    return res.redirect('/urls');
+  };
+  
   console.log('four /register GET');
   const templateVars = {
     user_Id : req.cookies.user_Id,
@@ -133,6 +137,9 @@ app.post("/logout", (req,res) => {
 
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login.');
+  };
   const id = generateRandomString(6); // creates a unique ID
   urlDatabase[id] = req.body.longURL; // stores the newly created ID and long URL
   res.redirect(`/urls/${id}`);
@@ -140,6 +147,9 @@ app.post("/urls", (req, res) => {
 
 // add post to DELETE
 app.post("/urls/:id/delete", (req, res) => {
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login.');
+  };
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
@@ -147,6 +157,9 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // add post to EDIT
 app.post("/urls/:id/", (req, res) => {
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login.');
+  };
   const id = req.params.id;
   const updateURL = req.body.longURL;
   urlDatabase[id] = updateURL;
@@ -155,6 +168,9 @@ app.post("/urls/:id/", (req, res) => {
 
 //edit page
 app.post("/urls", (req, res) => {
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login.');
+  };
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
 });
@@ -184,6 +200,9 @@ app.get("/urls", (req,res) => {
 
 // create a new URL page
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies.user_Id){
+    return res.redirect('/login');
+  };
   const templateVars = {
     user_Id : req.cookies.user_Id,
   };
@@ -192,6 +211,9 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login.');
+  };
   const templateVars = {
     id: req.params.id,
     urls: urlDatabase,
