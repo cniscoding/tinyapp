@@ -37,12 +37,7 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
-// const userEmail = function () {
-//   for (let user of Object.keys(users))
-//     console.log('user',users[user].email)
-//     console.log('req.body.email',req.body.email)
-//     return users[user].email;
-// }
+
 const userLookUp = function(email){
   for (let user of Object.keys(users)){
     if (email !== users[user].email){
@@ -51,6 +46,25 @@ const userLookUp = function(email){
     return users;
   }
 }
+// POST login page?
+// won't work beacuse the conditional is not completed
+app.post("/login", (req,res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  // if statement for wrong password and/or account does not exist
+
+  res.cookie('user_id', user_Id);
+  res.redirect('/urls')
+})
+
+// GET login page 
+//does not have the the email and password match yet
+app.get("/login", (req, res)=> {
+  const templateVars = {
+    user_Id : req.cookies.user_Id,
+  };
+  res.render('login', templateVars)
+})
 
 // register new user
 app.post('/register', (req,res) =>{
@@ -67,20 +81,13 @@ app.post('/register', (req,res) =>{
   const email = req.body.email;
   const password = req.body.password;
   const id = generateRandomString(6);
-
   const newUser = {
     id,
     email,
     password
   };
   users[id] = newUser;
- 
-  // console.log('email', email)
-  // console.log('password', password)
-  // console.log('id', id)
-  // console.log('newUser', newUser)
   console.log('users', users)
-
   res.cookie('user_Id', newUser);
   res.redirect('/urls');
 })
@@ -148,10 +155,6 @@ app.get("/u/:id", (req, res) => {
   // }
 });
 
-// // login page - do i even need this?
-// app.get("/login", (req,res) => {
-//   res.render('login')
-// })
 
 // home page that shows the list
 app.get("/urls", (req,res) => {
