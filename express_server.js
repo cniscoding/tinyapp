@@ -152,20 +152,14 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString(6); // creates a unique ID
   const newUserId = req.cookies.user_Id
   const inputUrl = req.body.longURL;
-  // MADE LONG URL EDIT HERE  
-  // console.log('urlDatabase[id]', urlDatabase[id])
-  // console.log('req.body.longURL',req.body.longURL)
-  // console.log('urlDatabase', urlDatabase)
 
   const addLink = {
     longURL : inputUrl,
     userID : newUserId,
   };
 
-  // console.log('urlDatabase[id][user_Id]',urlDatabase[id])
-  urlDatabase[id] = addLink; // stores the newly created ID and long URL
-  // console.log('urlDatabase', urlDatabase) // works as intended
-   res.redirect(`/urls/${id}`);
+  urlDatabase[id] = addLink;
+  res.redirect(`/urls/${id}`);
 });
 
 // add post to DELETE
@@ -188,7 +182,7 @@ app.post("/urls/:id/", (req, res) => {
 
   
   // MADE LONG URL EDIT HERE
-  console.log('req.params.id',req.params.id)
+  // console.log('req.params.id',req.params.id)
   const updateURL = req.body.longURL;
   urlDatabase[id].longURL = updateURL;
   res.redirect(`/urls`);
@@ -212,11 +206,32 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-
+  const urlsForUser = function(id) {
+    let userUrl = {}
+    for (let key in urlDatabase){
+      // console.log('key', key)
+      // console.log('urlDatabase[key]', urlDatabase[key].userID)
+      if(urlDatabase[key].userID === id){
+        console.log('urlDatabase[key].longURL', urlDatabase[key].longURL)
+        userUrl[key] = urlDatabase[key].longURL;
+      }
+    }
+    console.log('userUrl' ,userUrl)
+    return userUrl
+  }
 // home page that shows the list
 app.get("/urls", (req,res) => {
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login to view');
+  };
+
+
+  console.log('urlsForUser(req.cookies.user_Id)',urlsForUser(req.cookies.user_Id))
+  console.log('urlDatabase', urlDatabase)
+
   const templateVars = {
-    urls : urlDatabase,
+    // urls : urlDatabase,
+    urls : urlsForUser(req.cookies.user_Id),
     user_Id : req.cookies.user_Id,
   };
   res.render('urls_index', templateVars);
@@ -235,9 +250,6 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
-  // if (!req.cookies.user_Id){
-  //   return res.status(401).send('401 - Unauthorized access. Please login.');
-  // };
   if (!urlDatabase[req.params.id]){
     return res.status(404).send('404 - Page not found.')
   }
