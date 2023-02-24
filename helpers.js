@@ -9,38 +9,40 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
-const userPass = function(inputEmail) {
-  for (let user in users) {
-    if (users[user].email === inputEmail) {
-      return users[user].password;
+const userPass = function(inputEmail, database) {
+  for (let user in database) {
+    if (database[user].email === inputEmail) {
+      return database[user].password;
     }
   }
 };
 
-const userLookUp = function(input, search) {
-  for (let user of Object.keys(users)) {
+const userLookUp = function(input, search, database) {
+  for (let user of Object.keys(database)) {
     if (search === 'id') {
-      if (input === users[user].email)
-        return users[user].id;
+      if (input === database[user].email)
+        return database[user].id;
     }
-    if (input === users[user][search]) {
+    if (input === database[user][search]) {
       return true;
     }
   }
   return false;
 };
 
-const urlsForUser = function(id) {
+const urlsForUser = function(id, database) {
   let userUrl = {};
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      userUrl[key] = urlDatabase[key].longURL;
+  for (let key in database) {
+    if (database[key].userID === id) {
+      userUrl[key] = database[key].longURL;
     }
   }
   return userUrl;
 };
 
-module.exports  = generateRandomString;
-module.exports = userPass;
-module.exports = userLookUp;
-module.exports = urlsForUser;
+module.exports  = {
+generateRandomString,
+userPass,
+userLookUp,
+urlsForUser,
+};

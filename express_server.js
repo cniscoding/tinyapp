@@ -1,8 +1,11 @@
 // added requires one at at time because object didn't work? need ask mentor what i'm doing wrong.
-// const generateRandomString = require('./helpers');
-// const userPass  = require('./helpers');
-// const userLookUp = require('./helpers');
-// const urlsForUser = require('./helpers');
+const {
+  generateRandomString,
+  userPass,
+  userLookUp,
+  urlsForUser,
+  } = require('./helpers');
+
 
 const cookieSession = require("cookie-session");
 const express = require("express");
@@ -40,71 +43,70 @@ const users = {
   //   email: "user2@example.com",
   //   password: "dishwasher-funk",
   // },
-  // test1: {
-  //   id: "tester1",
-  //   email: "tester1@test.ca",
-  //   password: "testme",
-  // },
+  '8q7vIC': {
+    id: '8q7vIC',
+    email: 'tester1@test.ca',
+    password: '$2a$10$qbheRpSnVSunCg6JazA9/OGmsyxDKCzRcL6rzBowHEYORQVW2CMdC'
+  }
 };
 // helper functions
-const generateRandomString = function(uniqueLength) {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let randomString = '';
-  for (let i = 0; i < uniqueLength; i++) {
-    const randomIndex = (Math.floor(Math.random() * (letters.length - 1)));
-    randomString += letters[randomIndex];
-  }
-  return randomString;
-};
+// const generateRandomString = function(uniqueLength) {
+//   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//   let randomString =ll '';
+//   for (let i = 0; i < uniqueLength; i++) {
+//     const randomIndex = (Math.floor(Math.random() * (letters.length - 1)));
+//     randomString += letters[randomIndex];
+//   }
+//   return randomString;
+// };
 
-const userPass = function(inputEmail) {
-  for (let user in users) {
-    if (users[user].email === inputEmail) {
-      return users[user].password;
-    }
-  }
-};
+// const userPass = function(inputEmail) {
+//   for (let user in users) {
+//     if (users[user].email === inputEmail) {
+//       return users[user].password;
+//     }
+//   }
+// };
 
-const userLookUp = function(input, search) {
-  for (let user of Object.keys(users)) {
-    if (search === 'id') {
-      if (input === users[user].email)
-        return users[user].id;
-    }
-    if (input === users[user][search]) {
-      return true;
-    }
-  }
-  return false;
-};
+// const userLookUp = function(input, search) {
+//   for (let user of Object.keys(users)) {
+//     if (search === 'id') {
+//       if (input === users[user].email)
+//         return users[user].id;
+//     }
+//     if (input === users[user][search]) {
+//       return true;
+//     }
+//   }
+//   return false;
+// };
 
-const urlsForUser = function(id) {
-  let userUrl = {};
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      userUrl[key] = urlDatabase[key].longURL;
-    }
-  }
-  return userUrl;
-};
+// const urlsForUser = function(id) {
+//   let userUrl = {};
+//   for (let key in urlDatabase) {
+//     if (urlDatabase[key].userID === id) {
+//       userUrl[key] = urlDatabase[key].longURL;
+//     }
+//   }
+//   return userUrl;
+// };
 
 // POST login
 app.post("/login", (req,res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
 
-  if (!userLookUp(inputEmail, 'email')) {
+  if (!userLookUp(inputEmail, 'email', users)) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
   
-  if (bcrypt.compareSync(inputPassword, userPass(inputEmail))) {
-    const user = userLookUp(inputEmail, 'id');
+  if (bcrypt.compareSync(inputPassword, userPass(inputEmail, users))) {
+    const user = userLookUp(inputEmail, 'id', users);
     req.session.user_Id = user;
     res.redirect('/urls/');
   } else {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
-
 });
 
 // GET login page
@@ -129,17 +131,18 @@ app.post('/register', (req,res) =>{
     return res.status(400).send('error 400 - please enter an email and/or password');
   }
   
-  if (userLookUp(inputEmail, 'email')) {
+  if (userLookUp(inputEmail, 'email', users)) {
     return res.status(400).send('error 400 - email already exist');
   }
 
   const newUser = {
-    id : inputEmail,
+    id : id,
     email : inputEmail,
     password : hashedPassword
   };
   users[id] = newUser;
   req.session.user_Id = newUser.email;
+  console.log('users',users) // remove this when done testing
   res.redirect('/urls');
 });
 
@@ -181,6 +184,7 @@ app.post("/urls", (req, res) => {
     userID : newUserId,
   };
 
+  console.log('urlDatabase', urlDatabase)
   urlDatabase[id] = addLink;
   res.redirect(`/urls/${id}`);
 });
@@ -236,9 +240,10 @@ app.get("/urls", (req,res) => {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
   }
   const templateVars = {
-    urls : urlsForUser(req.session.user_Id),
+    urls : urlsForUser(req.session.user_Id, urlDatabase),
     user_Id : req.session.user_Id,
   };
+  console.log('req.session.user_Id',req.session.user_Id)
   res.render('urls_index', templateVars);
 });
 
