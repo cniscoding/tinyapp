@@ -1,11 +1,8 @@
-// added requires one at at time because object didn't work? need ask mentor what i'm doing wrong.
 const {
   generateRandomString,
-  userPass,
   userLookUp,
   urlsForUser,
   } = require('./helpers');
-
 
 const cookieSession = require("cookie-session");
 const express = require("express");
@@ -15,7 +12,7 @@ const bcrypt = require("bcryptjs");
 
 app.set("view engine", "ejs");
 
-//middleware
+// middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'cookiemonster',
@@ -43,53 +40,12 @@ const users = {
   //   email: "user2@example.com",
   //   password: "dishwasher-funk",
   // },
-  '8q7vIC': {
-    id: '8q7vIC',
-    email: 'tester1@test.ca',
-    password: '$2a$10$qbheRpSnVSunCg6JazA9/OGmsyxDKCzRcL6rzBowHEYORQVW2CMdC'
-  }
+    yL6lvj: {
+    id: 'yL6lvj',
+    email: '1@1.ca',
+    password: '$2a$10$wxMJyyddGu2jRhqq0o1qIuyH4Mtb.2Tb0XKuZ8pRq8irQEGlGm9ei' // 123
+  },
 };
-// helper functions
-// const generateRandomString = function(uniqueLength) {
-//   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let randomString =ll '';
-//   for (let i = 0; i < uniqueLength; i++) {
-//     const randomIndex = (Math.floor(Math.random() * (letters.length - 1)));
-//     randomString += letters[randomIndex];
-//   }
-//   return randomString;
-// };
-
-// const userPass = function(inputEmail) {
-//   for (let user in users) {
-//     if (users[user].email === inputEmail) {
-//       return users[user].password;
-//     }
-//   }
-// };
-
-// const userLookUp = function(input, search) {
-//   for (let user of Object.keys(users)) {
-//     if (search === 'id') {
-//       if (input === users[user].email)
-//         return users[user].id;
-//     }
-//     if (input === users[user][search]) {
-//       return true;
-//     }
-//   }
-//   return false;
-// };
-
-// const urlsForUser = function(id) {
-//   let userUrl = {};
-//   for (let key in urlDatabase) {
-//     if (urlDatabase[key].userID === id) {
-//       userUrl[key] = urlDatabase[key].longURL;
-//     }
-//   }
-//   return userUrl;
-// };
 
 // POST login
 app.post("/login", (req,res) => {
@@ -99,9 +55,11 @@ app.post("/login", (req,res) => {
   if (!userLookUp(inputEmail, 'email', users)) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
-  
-  if (bcrypt.compareSync(inputPassword, userPass(inputEmail, users))) {
-    const user = userLookUp(inputEmail, 'id', users);
+  // console.log('userLookUp(inputEmail, password users', userLookUp(inputEmail, 'password', users))
+  // console.log('userPass(inputEmail, users)', userPass(inputEmail, users))
+
+  if (bcrypt.compareSync(inputPassword, userLookUp(inputEmail, 'password', users))) {
+    const user = userLookUp(inputEmail, 'id', users);  
     req.session.user_Id = user;
     res.redirect('/urls/');
   } else {
@@ -173,7 +131,7 @@ app.post("/logout", (req,res) => {
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
   if (!req.session.user_Id) {
-    return res.status(401).send('401 - Unauthorized access. Please login.');
+    return res.status(401).send('401 - Unauthorized access. Please login. ON URL PAGE');
   }
   const id = generateRandomString(6);
   const newUserId = req.session.user_Id;
@@ -221,7 +179,7 @@ app.post("/urls/:id/", (req, res) => {
 //edit page
 app.post("/urls", (req, res) => {
   if (!req.session.user_Id) {
-    return res.status(401).send('401 - Unauthorized access. Please login.');
+    return res.status(401).send('401 - Unauthorized access. Please login. ON EDIT PAGE?');
   }
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
@@ -237,7 +195,7 @@ app.get("/u/:id", (req, res) => {
 // home page that shows the list
 app.get("/urls", (req,res) => {
   if (!req.session.user_Id) {
-    return res.status(401).send('401 - Unauthorized access. Please login to view');
+    return res.status(401).send('401 - Unauthorized access. Please login to view ON HOME PAGE');
   }
   const templateVars = {
     urls : urlsForUser(req.session.user_Id, urlDatabase),
