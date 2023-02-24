@@ -55,8 +55,6 @@ app.post("/login", (req,res) => {
   if (!userLookUp(inputEmail, 'email', users)) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
-  // console.log('userLookUp(inputEmail, password users', userLookUp(inputEmail, 'password', users))
-  // console.log('userPass(inputEmail, users)', userPass(inputEmail, users))
 
   if (bcrypt.compareSync(inputPassword, userLookUp(inputEmail, 'password', users))) {
     const user = userLookUp(inputEmail, 'id', users);  
