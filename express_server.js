@@ -9,12 +9,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// update urlDatabase to the below
-// const urlDatabase = {
-//   b2xVn2: "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -65,6 +59,16 @@ const userLookUp = function(input, search) {
   }
   return false;
 };
+
+const urlsForUser = function(id) {
+  let userUrl = {}
+  for (let key in urlDatabase){
+    if(urlDatabase[key].userID === id){
+      userUrl[key] = urlDatabase[key].longURL;
+    }
+  }
+  return userUrl
+}
 
 // POST login
 app.post("/login", (req,res) => {
@@ -143,13 +147,12 @@ app.post("/logout", (req,res) => {
   res.redirect('/login');
 });
 
-
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
   if (!req.cookies.user_Id){
     return res.status(401).send('401 - Unauthorized access. Please login.');
   };
-  const id = generateRandomString(6); // creates a unique ID
+  const id = generateRandomString(6);
   const newUserId = req.cookies.user_Id
   const inputUrl = req.body.longURL;
 
@@ -167,6 +170,13 @@ app.post("/urls/:id/delete", (req, res) => {
   if (!req.cookies.user_Id){
     return res.status(401).send('401 - Unauthorized access. Please login.');
   };
+  if (!urlDatabase[req.params.id]){
+    return res.status(404).send('404 - Page not found.')
+  }
+  if (urlDatabase[req.params.id].userID !== req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login to view');
+  };
+ 
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
@@ -177,12 +187,8 @@ app.post("/urls/:id/", (req, res) => {
   if (!req.cookies.user_Id){
     return res.status(401).send('401 - Unauthorized access. Please login.');
   };
-  
-  const id = req.params.id;
 
-  
-  // MADE LONG URL EDIT HERE
-  // console.log('req.params.id',req.params.id)
+  const id = req.params.id;
   const updateURL = req.body.longURL;
   urlDatabase[id].longURL = updateURL;
   res.redirect(`/urls`);
@@ -206,31 +212,12 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-  const urlsForUser = function(id) {
-    let userUrl = {}
-    for (let key in urlDatabase){
-      // console.log('key', key)
-      // console.log('urlDatabase[key]', urlDatabase[key].userID)
-      if(urlDatabase[key].userID === id){
-        console.log('urlDatabase[key].longURL', urlDatabase[key].longURL)
-        userUrl[key] = urlDatabase[key].longURL;
-      }
-    }
-    console.log('userUrl' ,userUrl)
-    return userUrl
-  }
 // home page that shows the list
 app.get("/urls", (req,res) => {
   if (!req.cookies.user_Id){
     return res.status(401).send('401 - Unauthorized access. Please login to view');
   };
-
-
-  console.log('urlsForUser(req.cookies.user_Id)',urlsForUser(req.cookies.user_Id))
-  console.log('urlDatabase', urlDatabase)
-
   const templateVars = {
-    // urls : urlDatabase,
     urls : urlsForUser(req.cookies.user_Id),
     user_Id : req.cookies.user_Id,
   };
@@ -250,9 +237,16 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]){
+  if (!req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login to view');
+  };
+  if (!urlDatabase[req.params.id].longURL){
     return res.status(404).send('404 - Page not found.')
   }
+  if (urlDatabase[req.params.id].userID !== req.cookies.user_Id){
+    return res.status(401).send('401 - Unauthorized access. Please login to view');
+  };
+
   const templateVars = {
     id: req.params.id,
     urls: urlDatabase,
