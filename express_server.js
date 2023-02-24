@@ -225,9 +225,9 @@ app.get("/urls/:id", (req, res) => {
 // GET page for /
 app.get("/", (req,res) => {
   if (!req.session.user_Id) {
-    res.redirect("/login");
+    return res.redirect("/login");
   }
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
