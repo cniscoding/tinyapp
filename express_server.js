@@ -2,6 +2,7 @@ const cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bcrypt = require("bcryptjs");
 
 app.set("view engine", "ejs");
 
@@ -20,21 +21,21 @@ const urlDatabase = {
   },
 };
 const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-  test1: {
-    id: "tester1",
-    email: "tester1@test.ca",
-    password: "testme",
-  },
+  // userRandomID: {
+  //   id: "userRandomID",
+  //   email: "user@example.com",
+  //   password: "purple-monkey-dinosaur",
+  // },
+  // user2RandomID: {
+  //   id: "user2RandomID",
+  //   email: "user2@example.com",
+  //   password: "dishwasher-funk",
+  // },
+  // test1: {
+  //   id: "tester1",
+  //   email: "tester1@test.ca",
+  //   password: "testme",
+  // },
 };
 // helper functions
 const generateRandomString = function(uniqueLength) {
@@ -47,14 +48,22 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
+const userPass = function(inputEmail){
+  for (let user in users){
+    if (users[user].email === inputEmail){
+      return users[user].password
+    }
+  }
+}
+
 const userLookUp = function(input, search) {
   for (let user of Object.keys(users)) {
-    if (input === users[user][search]) {
-      return true;
-    }
     if (search === 'id') {
       if (input === users[user].email)
         return users[user].id;
+    }
+    if (input === users[user][search]) {
+      return true;
     }
   }
   return false;
@@ -74,18 +83,26 @@ const urlsForUser = function(id) {
 app.post("/login", (req,res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
+  // const hashedPassword = bcrypt.hashSync(inputPassword, 10);
 
   if (!userLookUp(inputEmail, 'email')) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
   
-  if (!userLookUp(inputPassword, 'password')) {
+  // if (!userLookUp(inputPassword, 'password')) {
+  //   return res.status(403).send('error 403 - please enter a valid email and/or password');
+  // }
+
+
+
+  if(bcrypt.compareSync(inputPassword, userPass(inputEmail))) {
+    const user = userLookUp(inputEmail, 'id');
+    res.cookie('user_Id', user);
+    res.redirect('/urls/');
+  } else {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
 
-  const user = userLookUp(inputEmail, 'id');
-  res.cookie('user_Id', user);
-  res.redirect('/urls/');
 });
 
 // GET login page
@@ -104,6 +121,7 @@ app.post('/register', (req,res) =>{
   const id = generateRandomString(6);
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
+  const hashedPassword = bcrypt.hashSync(inputPassword, 10);
   
   if (inputEmail === '' || inputPassword === '') {
     return res.status(400).send('error 400 - please enter an email and/or password');
@@ -116,9 +134,11 @@ app.post('/register', (req,res) =>{
   const newUser = {
     id : inputEmail,
     email : inputEmail,
-    password : inputPassword
+    password : hashedPassword
   };
   users[id] = newUser;
+  // console.log('hashedPassword',hashedPassword)
+  // console.log('users',users)
   res.cookie('user_Id', newUser.email);
   res.redirect('/urls');
 });
