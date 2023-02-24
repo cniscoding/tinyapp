@@ -1,18 +1,22 @@
-// const cookieParser = require("cookie-parser");
+// added requires one at at time because object didn't work? need ask mentor what i'm doing wrong.
+// const generateRandomString = require('./helpers');
+// const userPass  = require('./helpers');
+// const userLookUp = require('./helpers');
+// const urlsForUser = require('./helpers');
+
 const cookieSession = require("cookie-session");
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080; 
 const bcrypt = require("bcryptjs");
 
 app.set("view engine", "ejs");
 
 //middleware
 app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
 app.use(cookieSession({
   name: 'cookiemonster',
-  keys: ['secretket']
+  keys: ['secretkey']
 }));
 
 const urlDatabase = {
@@ -88,21 +92,13 @@ const urlsForUser = function(id) {
 app.post("/login", (req,res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
-  // const hashedPassword = bcrypt.hashSync(inputPassword, 10);
 
   if (!userLookUp(inputEmail, 'email')) {
     return res.status(403).send('error 403 - please enter a valid email and/or password');
   }
   
-  // if (!userLookUp(inputPassword, 'password')) {
-  //   return res.status(403).send('error 403 - please enter a valid email and/or password');
-  // }
-
-
-
   if (bcrypt.compareSync(inputPassword, userPass(inputEmail))) {
     const user = userLookUp(inputEmail, 'id');
-    // res.cookie('user_Id', user);
     req.session.user_Id = user;
     res.redirect('/urls/');
   } else {
@@ -113,12 +109,10 @@ app.post("/login", (req,res) => {
 
 // GET login page
 app.get("/login", (req, res)=> {
-  // if (req.cookies.user_Id){
   if (req.session.user_Id) {
     return res.redirect('/urls');
   }
   const templateVars = {
-    // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_id,
   };
   res.render('login', templateVars);
@@ -145,21 +139,16 @@ app.post('/register', (req,res) =>{
     password : hashedPassword
   };
   users[id] = newUser;
-  // console.log('hashedPassword',hashedPassword)
-  // console.log('users',users)
-  // res.cookie('user_Id', newUser.email);
   req.session.user_Id = newUser.email;
   res.redirect('/urls');
 });
 
 // add GET /register
 app.get("/register", (req, res)=> {
-  // if (req.cookies.user_Id){
   if (req.session.user_id) {
     return res.redirect('/urls');
   }
   const templateVars = {
-    // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_Id,
   };
   res.render('register', templateVars);
@@ -168,26 +157,22 @@ app.get("/register", (req, res)=> {
 // add POST route for /login
 app.post("/login", (req, res) => {
   const user_Id = req.body.username;
-  // res.cookie('user_Id', user_Id);
   res.session.user_Id = user_Id;
   res.redirect('logins');
 });
 
 // logout
 app.post("/logout", (req,res) => {
-  // res.clearCookie(req.session.user_Id);
   req.session = null;
   res.redirect('/login');
 });
 
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
   }
   const id = generateRandomString(6);
-  // const newUserId = req.cookies.user_Id
   const newUserId = req.session.user_Id;
   const inputUrl = req.body.longURL;
 
@@ -202,7 +187,6 @@ app.post("/urls", (req, res) => {
 
 // add post to DELETE
 app.post("/urls/:id/delete", (req, res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
   }
@@ -220,7 +204,6 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // add post to EDIT
 app.post("/urls/:id/", (req, res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
   }
@@ -229,12 +212,10 @@ app.post("/urls/:id/", (req, res) => {
   const updateURL = req.body.longURL;
   urlDatabase[id].longURL = updateURL;
   res.redirect(`/urls`);
-  console.log(urlDatabase);
 });
 
 //edit page
 app.post("/urls", (req, res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
   }
@@ -242,7 +223,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-// redirects to the long URL based on the short string.
 app.get("/u/:id", (req, res) => {
   const linkLongUrl = urlDatabase[req.params.id].longURL;
   if (linkLongUrl) {
@@ -252,13 +232,10 @@ app.get("/u/:id", (req, res) => {
 
 // home page that shows the list
 app.get("/urls", (req,res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
   }
   const templateVars = {
-    // urls : urlsForUser(req.cookies.user_Id),
-    // user_Id : req.cookies.user_Id,
     urls : urlsForUser(req.session.user_Id),
     user_Id : req.session.user_Id,
   };
@@ -267,12 +244,10 @@ app.get("/urls", (req,res) => {
 
 // create a new URL page
 app.get("/urls/new", (req, res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.redirect('/login');
   }
   const templateVars = {
-    // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_Id,
   };
   res.render("urls_new", templateVars);
@@ -280,14 +255,12 @@ app.get("/urls/new", (req, res) => {
 
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
-  // if (!req.cookies.user_Id){
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
   }
   if (!urlDatabase[req.params.id].longURL) {
     return res.status(404).send('404 - Page not found.');
   }
-  // if (urlDatabase[req.params.id].userID !== req.cookies.user_Id){
   if (urlDatabase[req.params.id].userID !== req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
   }
@@ -295,7 +268,6 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     urls: urlDatabase,
-    // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_Id,
   };
   res.render("urls_show", templateVars);
