@@ -9,16 +9,16 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
-const userLookUp = function (input, search, database) {
+const userLookUp = function(input, search, database) {
   for (let user in database) {
-    if (input === database[user].email){
+    if (input === database[user].email) {
       if (search === 'id') {
         return database[user].email;
       }
       if (search === 'password') {
         return database[user].password;
       }
-    return true;
+      return true;
     }
   }
   return false;
@@ -35,7 +35,7 @@ const urlsForUser = function(id, database) {
 };
 
 module.exports  = {
-generateRandomString,
-userLookUp,
-urlsForUser,
+  generateRandomString,
+  userLookUp,
+  urlsForUser,
 };

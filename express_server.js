@@ -2,23 +2,24 @@ const {
   generateRandomString,
   userLookUp,
   urlsForUser,
-  } = require('./helpers');
+} = require('./helpers');
 
 const cookieSession = require("cookie-session");
 const express = require("express");
 const app = express();
-const PORT = 8080; 
+const PORT = 8080;
 const bcrypt = require("bcryptjs");
 
 app.set("view engine", "ejs");
 
-// middleware
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'cookiemonster',
   keys: ['secretkey']
 }));
 
+// Databases
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -29,25 +30,16 @@ const urlDatabase = {
     userID: "aJ48lW",
   },
 };
+
 const users = {
-  // userRandomID: {
-  //   id: "userRandomID",
-  //   email: "user@example.com",
-  //   password: "purple-monkey-dinosaur",
-  // },
-  // user2RandomID: {
-  //   id: "user2RandomID",
-  //   email: "user2@example.com",
-  //   password: "dishwasher-funk",
-  // },
-    yL6lvj: {
+  yL6lvj: {
     id: 'yL6lvj',
     email: '1@1.ca',
-    password: '$2a$10$wxMJyyddGu2jRhqq0o1qIuyH4Mtb.2Tb0XKuZ8pRq8irQEGlGm9ei' // 123
+    password: '$2a$10$wxMJyyddGu2jRhqq0o1qIuyH4Mtb.2Tb0XKuZ8pRq8irQEGlGm9ei'
   },
 };
 
-// POST login
+// POST login page
 app.post("/login", (req,res) => {
   const inputEmail = req.body.email;
   const inputPassword = req.body.password;
@@ -57,7 +49,7 @@ app.post("/login", (req,res) => {
   }
 
   if (bcrypt.compareSync(inputPassword, userLookUp(inputEmail, 'password', users))) {
-    const user = userLookUp(inputEmail, 'id', users);  
+    const user = userLookUp(inputEmail, 'id', users);
     req.session.user_Id = user;
     res.redirect('/urls/');
   } else {
@@ -76,7 +68,7 @@ app.get("/login", (req, res)=> {
   res.render('login', templateVars);
 });
 
-// register new user
+// POST register new user
 app.post('/register', (req,res) =>{
   const id = generateRandomString(6);
   const inputEmail = req.body.email;
@@ -98,11 +90,10 @@ app.post('/register', (req,res) =>{
   };
   users[id] = newUser;
   req.session.user_Id = newUser.email;
-  console.log('users',users) // remove this when done testing
   res.redirect('/urls');
 });
 
-// add GET /register
+// GET register page
 app.get("/register", (req, res)=> {
   if (req.session.user_id) {
     return res.redirect('/urls');
@@ -113,23 +104,23 @@ app.get("/register", (req, res)=> {
   res.render('register', templateVars);
 });
 
-// add POST route for /login
+// POST route for /login
 app.post("/login", (req, res) => {
   const user_Id = req.body.username;
   res.session.user_Id = user_Id;
   res.redirect('logins');
 });
 
-// logout
+// POST logout
 app.post("/logout", (req,res) => {
   req.session = null;
   res.redirect('/login');
 });
 
-// takes submitted input and adds to urlDatabase
+// POST add new URLs
 app.post("/urls", (req, res) => {
   if (!req.session.user_Id) {
-    return res.status(401).send('401 - Unauthorized access. Please login. ON URL PAGE');
+    return res.status(401).send('401 - Unauthorized access. Please login.');
   }
   const id = generateRandomString(6);
   const newUserId = req.session.user_Id;
@@ -139,13 +130,11 @@ app.post("/urls", (req, res) => {
     longURL : inputUrl,
     userID : newUserId,
   };
-
-  console.log('urlDatabase', urlDatabase)
   urlDatabase[id] = addLink;
   res.redirect(`/urls/${id}`);
 });
 
-// add post to DELETE
+// POST delete URLS
 app.post("/urls/:id/delete", (req, res) => {
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
@@ -162,7 +151,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-// add post to EDIT
+// POST edit URLS
 app.post("/urls/:id/", (req, res) => {
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
@@ -174,10 +163,10 @@ app.post("/urls/:id/", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//edit page
+// POST edit page
 app.post("/urls", (req, res) => {
   if (!req.session.user_Id) {
-    return res.status(401).send('401 - Unauthorized access. Please login. ON EDIT PAGE?');
+    return res.status(401).send('401 - Unauthorized access. Please login.');
   }
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
@@ -190,20 +179,19 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-// home page that shows the list
+// GET homepage
 app.get("/urls", (req,res) => {
   if (!req.session.user_Id) {
-    return res.status(401).send('401 - Unauthorized access. Please login to view ON HOME PAGE');
+    return res.status(401).send('401 - Unauthorized access. Please login to view');
   }
   const templateVars = {
     urls : urlsForUser(req.session.user_Id, urlDatabase),
     user_Id : req.session.user_Id,
   };
-  console.log('req.session.user_Id',req.session.user_Id)
   res.render('urls_index', templateVars);
 });
 
-// create a new URL page
+// GET new URLS
 app.get("/urls/new", (req, res) => {
   if (!req.session.user_Id) {
     return res.redirect('/login');
@@ -214,7 +202,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// page after creating a new URL
+// GET page after making a new URL
 app.get("/urls/:id", (req, res) => {
   if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
@@ -232,6 +220,14 @@ app.get("/urls/:id", (req, res) => {
     user_Id : req.session.user_Id,
   };
   res.render("urls_show", templateVars);
+});
+
+// GET page for /
+app.get("/", (req,res) => {
+  if (!req.session.user_Id) {
+    res.redirect("/login");
+  }
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
