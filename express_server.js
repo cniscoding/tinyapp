@@ -1,5 +1,5 @@
 // const cookieParser = require("cookie-parser");
-const cookieSession = require("cookie-session")
+const cookieSession = require("cookie-session");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -53,13 +53,13 @@ const generateRandomString = function(uniqueLength) {
   return randomString;
 };
 
-const userPass = function(inputEmail){
-  for (let user in users){
-    if (users[user].email === inputEmail){
-      return users[user].password
+const userPass = function(inputEmail) {
+  for (let user in users) {
+    if (users[user].email === inputEmail) {
+      return users[user].password;
     }
   }
-}
+};
 
 const userLookUp = function(input, search) {
   for (let user of Object.keys(users)) {
@@ -75,14 +75,14 @@ const userLookUp = function(input, search) {
 };
 
 const urlsForUser = function(id) {
-  let userUrl = {}
-  for (let key in urlDatabase){
-    if(urlDatabase[key].userID === id){
+  let userUrl = {};
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
       userUrl[key] = urlDatabase[key].longURL;
     }
   }
-  return userUrl
-}
+  return userUrl;
+};
 
 // POST login
 app.post("/login", (req,res) => {
@@ -100,7 +100,7 @@ app.post("/login", (req,res) => {
 
 
 
-  if(bcrypt.compareSync(inputPassword, userPass(inputEmail))) {
+  if (bcrypt.compareSync(inputPassword, userPass(inputEmail))) {
     const user = userLookUp(inputEmail, 'id');
     // res.cookie('user_Id', user);
     req.session.user_Id = user;
@@ -114,9 +114,9 @@ app.post("/login", (req,res) => {
 // GET login page
 app.get("/login", (req, res)=> {
   // if (req.cookies.user_Id){
-    if(req.session.user_Id){
+  if (req.session.user_Id) {
     return res.redirect('/urls');
-  };
+  }
   const templateVars = {
     // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_id,
@@ -155,9 +155,9 @@ app.post('/register', (req,res) =>{
 // add GET /register
 app.get("/register", (req, res)=> {
   // if (req.cookies.user_Id){
-  if (req.session.user_id){
+  if (req.session.user_id) {
     return res.redirect('/urls');
-  };
+  }
   const templateVars = {
     // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_Id,
@@ -169,7 +169,7 @@ app.get("/register", (req, res)=> {
 app.post("/login", (req, res) => {
   const user_Id = req.body.username;
   // res.cookie('user_Id', user_Id);
-  res.session.user_Id = user_Id
+  res.session.user_Id = user_Id;
   res.redirect('logins');
 });
 
@@ -183,9 +183,9 @@ app.post("/logout", (req,res) => {
 // takes submitted input and adds to urlDatabase
 app.post("/urls", (req, res) => {
   // if (!req.cookies.user_Id){
-  if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
-  };
+  }
   const id = generateRandomString(6);
   // const newUserId = req.cookies.user_Id
   const newUserId = req.session.user_Id;
@@ -203,15 +203,15 @@ app.post("/urls", (req, res) => {
 // add post to DELETE
 app.post("/urls/:id/delete", (req, res) => {
   // if (!req.cookies.user_Id){
-    if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
-  };
-  if (!urlDatabase[req.params.id]){
-    return res.status(404).send('404 - Page not found.')
   }
-  if (urlDatabase[req.params.id].userID !== req.session.user_Id){
+  if (!urlDatabase[req.params.id]) {
+    return res.status(404).send('404 - Page not found.');
+  }
+  if (urlDatabase[req.params.id].userID !== req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
-  };
+  }
  
   const id = req.params.id;
   delete urlDatabase[id];
@@ -221,23 +221,23 @@ app.post("/urls/:id/delete", (req, res) => {
 // add post to EDIT
 app.post("/urls/:id/", (req, res) => {
   // if (!req.cookies.user_Id){
-    if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
-  };
+  }
 
   const id = req.params.id;
   const updateURL = req.body.longURL;
   urlDatabase[id].longURL = updateURL;
   res.redirect(`/urls`);
-  console.log(urlDatabase)
+  console.log(urlDatabase);
 });
 
 //edit page
 app.post("/urls", (req, res) => {
   // if (!req.cookies.user_Id){
-    if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login.');
-  };
+  }
   const id = req.params.id;
   res.redirect(`/urls/${id}`);
 });
@@ -253,9 +253,9 @@ app.get("/u/:id", (req, res) => {
 // home page that shows the list
 app.get("/urls", (req,res) => {
   // if (!req.cookies.user_Id){
-    if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
-  };
+  }
   const templateVars = {
     // urls : urlsForUser(req.cookies.user_Id),
     // user_Id : req.cookies.user_Id,
@@ -268,9 +268,9 @@ app.get("/urls", (req,res) => {
 // create a new URL page
 app.get("/urls/new", (req, res) => {
   // if (!req.cookies.user_Id){
-    if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.redirect('/login');
-  };
+  }
   const templateVars = {
     // user_Id : req.cookies.user_Id,
     user_Id : req.session.user_Id,
@@ -281,23 +281,23 @@ app.get("/urls/new", (req, res) => {
 // page after creating a new URL
 app.get("/urls/:id", (req, res) => {
   // if (!req.cookies.user_Id){
-    if (!req.session.user_Id){
+  if (!req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
-  };
-  if (!urlDatabase[req.params.id].longURL){
-    return res.status(404).send('404 - Page not found.')
+  }
+  if (!urlDatabase[req.params.id].longURL) {
+    return res.status(404).send('404 - Page not found.');
   }
   // if (urlDatabase[req.params.id].userID !== req.cookies.user_Id){
-    if (urlDatabase[req.params.id].userID !== req.session.user_Id){
+  if (urlDatabase[req.params.id].userID !== req.session.user_Id) {
     return res.status(401).send('401 - Unauthorized access. Please login to view');
-  };
+  }
 
   const templateVars = {
     id: req.params.id,
     urls: urlDatabase,
     // user_Id : req.cookies.user_Id,
-    user_Id : req.session.user_Id, 
-  }
+    user_Id : req.session.user_Id,
+  };
   res.render("urls_show", templateVars);
 });
 
